@@ -1,5 +1,6 @@
 
 from collections import defaultdict
+import copy
 
 
 rows = 'ABCDEFGHI'
