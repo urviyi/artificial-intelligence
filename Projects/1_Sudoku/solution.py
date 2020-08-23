@@ -1,7 +1,5 @@
-
 from utils import *
 import copy
-
 
 row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
@@ -57,22 +55,22 @@ def naked_twins(values):
     """
     # TODO: Implement this function!
     
-    pairs = [box for box in values.keys() if len(values[box]) == 2]
-    out = copy.deepcopy(values)
+    #pairs = [box for box in values.keys() if len(values[box]) == 2]
     
-    for boxA in values:
+    out = copy.deepcopy(values)    
+
+    naked_twins = [box for box in values if len(values[box]) == 2]
+    for boxA in naked_twins:
         for boxB in peers[boxA]:
-            if values[boxA] == values[boxB] and len(values[boxA]) == 2:
-                peersA = peers[boxA]
-                peersB = peers[boxB]
-                for peer in (peersA.intersection(peersB)):
-                    digits = values[boxA] 
-                    for digit in digits:
+            if values[boxA] == values[boxB]:
+                for peer in ((peers[boxA]).intersection(peers[boxB])):
+                    digits = values[boxA]
+                    for digit in digits:                    
                         out[peer] = out[peer].replace(digit,'')
-            pass
-        pass        
         
     return out
+    
+    
     
     raise NotImplementedError
 
@@ -192,8 +190,11 @@ def search(values):
     "Using depth-first search and propagation, try all possible values."
     # First, reduce the puzzle using the previous function
     values = reduce_puzzle(values)
+    values = naked_twins(values)
+    
     if values is False:
         return False ## Failed earlier
+    
     if all(len(values[s]) == 1 for s in boxes): 
         return values ## Solved!
     # Choose one of the unfilled squares with the fewest possibilities
@@ -205,6 +206,8 @@ def search(values):
         attempt = search(new_sudoku)
         if attempt:
             return attempt
+    
+    
     raise NotImplementedError
 
 
@@ -231,8 +234,12 @@ def solve(grid):
 if __name__ == "__main__":
     diag_sudoku_grid = '2.............62....1....7...6..8...3...9...7...6..4...4....8....52.............3'
     display(grid2values(diag_sudoku_grid))
-    result = solve(diag_sudoku_grid)
-    display(result)
+    
+    try:
+        result = solve(diag_sudoku_grid)
+        display(result)
+    except SystemExit:
+        pass
 
     try:
         import PySudoku
