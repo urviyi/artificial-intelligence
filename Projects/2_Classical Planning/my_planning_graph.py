@@ -1,4 +1,3 @@
-
 from itertools import chain, combinations
 from aimacode.planning import Action
 from aimacode.utils import expr
@@ -53,7 +52,7 @@ class ActionLayer(BaseActionLayer):
         for effect in self.children[actionB]:
             if ~effect in self.parents[actionA]:
                 return True
-        
+
         return False
         pass
         #raise NotImplementedError
@@ -70,7 +69,12 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         layers.BaseLayer.parent_layer
         """
-        # TODO: implement this function
+    
+        for preconditionA in self.parents[actionA]:
+            for preconditionB in self.parents[actionB]:
+                if self.parent_layer.is_mutex(preconditionA, preconditionB):
+                    return True
+        return False
         pass
         #raise NotImplementedError
 
@@ -95,6 +99,9 @@ class LiteralLayer(BaseLiteralLayer):
     def _negation(self, literalA, literalB):
         """ Return True if two literals are negations of each other """
         # TODO: implement this function
+        if ~literalA == literalB:
+            return True
+        return False
         pass
         #raise NotImplementedError
 
@@ -219,6 +226,7 @@ class PlanningGraph:
         # TODO: implement setlevel heuristic
         pass
         #raise NotImplementedError
+        
 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
