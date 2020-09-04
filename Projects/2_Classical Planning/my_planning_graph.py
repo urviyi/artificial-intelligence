@@ -93,6 +93,11 @@ class LiteralLayer(BaseLiteralLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
+        for actionA in self.parents[literalA]:
+            for actionB in self.parents[literalB]:
+                if(self.parent_layer.is_mutex(actionA,actionB) is False):
+                    return False
+        return True
         pass
         #raise NotImplementedError
 
