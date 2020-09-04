@@ -9,6 +9,7 @@ from layers import BaseActionLayer, BaseLiteralLayer, makeNoOp, make_node
 class ActionLayer(BaseActionLayer):
 
     def _inconsistent_effects(self, actionA, actionB):
+        
         """ Return True if an effect of one action negates an effect of the other
 
         Hints:
@@ -20,7 +21,17 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for effect in self.children[actionA]:
+            if ~effect in self.children[actionB]:
+                return True
+        
+        for effect in self.children[actionB]:
+            if ~effect in self.children[actionA]:
+                return True
+        
+        return False
+        
+        pass        
 
 
     def _interference(self, actionA, actionB):
@@ -35,7 +46,17 @@ class ActionLayer(BaseActionLayer):
         layers.ActionNode
         """
         # TODO: implement this function
-        raise NotImplementedError
+        for effect in self.children[actionA]:
+            if ~effect in self.parents[actionB]:
+                return True
+        
+        for effect in self.children[actionB]:
+            if ~effect in self.parents[actionA]:
+                return True
+        
+        return False
+        pass
+        #raise NotImplementedError
 
     def _competing_needs(self, actionA, actionB):
         """ Return True if any preconditions of the two actions are pairwise mutex in the parent layer
@@ -50,7 +71,8 @@ class ActionLayer(BaseActionLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
+        pass
+        #raise NotImplementedError
 
 
 class LiteralLayer(BaseLiteralLayer):
@@ -67,12 +89,14 @@ class LiteralLayer(BaseLiteralLayer):
         layers.BaseLayer.parent_layer
         """
         # TODO: implement this function
-        raise NotImplementedError
+        pass
+        #raise NotImplementedError
 
     def _negation(self, literalA, literalB):
         """ Return True if two literals are negations of each other """
         # TODO: implement this function
-        raise NotImplementedError
+        pass
+        #raise NotImplementedError
 
 
 class PlanningGraph:
@@ -136,7 +160,8 @@ class PlanningGraph:
         Russell-Norvig 10.3.1 (3rd Edition)
         """
         # TODO: implement this function
-        raise NotImplementedError
+        pass
+        #raise NotImplementedError
 
     def h_maxlevel(self):
         """ Calculate the max level heuristic for the planning graph
@@ -166,7 +191,8 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
-        raise NotImplementedError
+        pass
+        #raise NotImplementedError
 
     def h_setlevel(self):
         """ Calculate the set level heuristic for the planning graph
@@ -191,7 +217,8 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
-        raise NotImplementedError
+        pass
+        #raise NotImplementedError
 
     ##############################################################################
     #                     DO NOT MODIFY CODE BELOW THIS LINE                     #
