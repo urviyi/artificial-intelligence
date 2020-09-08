@@ -145,6 +145,15 @@ class PlanningGraph:
         layer.update_mutexes()
         self.literal_layers = [layer]
         self.action_layers = []
+    
+    def level_cost(self, goal):
+        level_cost = 0
+        for cost, layer in enumerate(self.literal_layers):
+            if goal in layer:
+                if cost > level_cost:
+                    level_cost = cost
+                    break
+        return level_cost
 
     def h_levelsum(self):
         """ Calculate the level sum heuristic for the planning graph
@@ -203,7 +212,11 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
-        pass
+        costs = []
+        self.fill()
+        for goal in self.goal:
+            costs.append(self.level_cost(goal))
+        return max(costs)
         #raise NotImplementedError
 
     def h_setlevel(self):
@@ -229,8 +242,12 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
+        
+        
         pass
         #raise NotImplementedError
+        
+            
         
 
     ##############################################################################
