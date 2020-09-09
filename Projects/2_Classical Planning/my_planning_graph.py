@@ -212,11 +212,27 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic with A*
         """
         # TODO: implement maxlevel heuristic
+        '''
         costs = []
         self.fill()
         for goal in self.goal:
             costs.append(self.level_cost(goal))
         return max(costs)
+        '''
+        cost = 0
+        
+        while not self._is_leveled:
+            all_goals_met = True
+            for goal in self.goal:
+                if goal not in self.literal_layers[-1]:
+                    all_goals_met = False
+            if all_goals_met:
+                return cost
+            else:
+                self._extend()
+            cost = cost + 1
+        
+
         #raise NotImplementedError
 
     def h_setlevel(self):
