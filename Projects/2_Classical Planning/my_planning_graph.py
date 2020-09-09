@@ -155,21 +155,6 @@ class PlanningGraph:
                     break
         return level_cost
     
-    def find_goal(self,goal_in):
-        #first look in existing layers incase already expanded
-        for i,literal_layer in enumerate(self.literal_layers):
-            for literal in literal_layer:
-                if literal==goal_in:
-                    return i
-        #cannot find in existing layers - expand and look
-        found_goal = False
-        while not found_goal and not self._is_leveled and len(self.literal_layers)<1e6:
-            self._extend()
-            for literal in self.literal_layers[-1]:
-                if literal==goal_in:
-                    return len(self.literal_layers)-1            
-        raise Exception("Cannot find goal {}".format(goal_in))
-
     def h_levelsum(self):
         """ Calculate the level sum heuristic for the planning graph
 
@@ -196,16 +181,16 @@ class PlanningGraph:
         Russell-Norvig 10.3.1 (3rd Edition)
         """
         # TODO: implement this function
-        
+        '''
         costs = []
         self.fill()
         for goal in self.goal:
             costs.append(self.level_cost(goal))
         return sum(costs)
-        
-        
         '''
+        
         costs = []
+        
         while not self._is_leveled:
             all_goals_met = True
             for goal in self.goal:
@@ -215,27 +200,9 @@ class PlanningGraph:
             if all_goals_met:
                 return sum(costs)
             else:
+                costs.clear()
                 self._extend()
-        '''
-        '''
-        cost = 0
-        while not self._is_leveled:
-            all_goals_met = True
-            for goal in self.goal:
-                cost += self.level_cost(goal)
-                if goal not in self.literal_layers[-1]:
-                    all_goals_met = False
-            if all_goals_met:
-                return cost
-            else:
-                self._extend()
-        '''
-        '''
-        heu_level_sum = 0
-        for g in self.goal: #foreach goal
-            heu_level_sum += self.find_goal(g)
-        return heu_level_sum
-        '''
+        
         pass
         #raise NotImplementedError
 
