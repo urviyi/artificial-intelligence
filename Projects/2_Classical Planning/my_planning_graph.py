@@ -280,6 +280,7 @@ class PlanningGraph:
         WARNING: you should expect long runtimes using this heuristic on complex problems
         """
         # TODO: implement setlevel heuristic
+        '''
         self.fill()
         
         for i,layer in enumerate(self.literal_layers):
@@ -300,6 +301,27 @@ class PlanningGraph:
                 return i
                 
         pass
+        '''
+        
+        def AllGoalSeen(layer):
+            for goal in self.goal:
+                if goal not in layer:
+                    return False
+            return True
+        def NoMutex(layer):
+            for goal1,goal2 in combinations(self.goal,2):
+                if layer.is_mutex(goal1,goal2):
+                    return False
+            return True
+        level = 0
+        while not self._is_leveled:
+            last_layer=self.literal_layers[-1]
+            if AllGoalSeen(last_layer) and NoMutex(last_layer):
+                return level
+            self._extend()
+            level += 1
+        return -1
+    
         #raise NotImplementedError
         
             
