@@ -303,25 +303,28 @@ class PlanningGraph:
         pass
         '''
         
-        def AllGoalSeen(layer):
+        def all_goals_met(layer):
             for goal in self.goal:
                 if goal not in layer:
                     return False
             return True
-        def NoMutex(layer):
-            for goal1,goal2 in combinations(self.goal,2):
-                if layer.is_mutex(goal1,goal2):
-                    return False
+            
+        def no_mutex(layer):
+            goals_are_mutex = False
+            for goalA in self.goal:
+                for goalB in self.goal:
+                    if layer.is_mutex(goalA,goalB):
+                        return False
             return True
-        level = 0
+             
+        i = 0
         while not self._is_leveled:
-            last_layer=self.literal_layers[-1]
-            if AllGoalSeen(last_layer) and NoMutex(last_layer):
-                return level
+            if all_goals_met(self.literal_layers[-1]) and no_mutex(self.literal_layers[-1]):
+                return i
             self._extend()
-            level += 1
+            i = i+1
         return -1
-    
+                
         #raise NotImplementedError
         
             
