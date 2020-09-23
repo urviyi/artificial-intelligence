@@ -54,25 +54,42 @@ class CustomPlayer(DataPlayer):
             self.queue.put(self.minimax(state, depth=3))
         
         
-    def minimax(self, state, depth):
+    def minimax(self, state, depth):        
 
-        def min_value(state, depth):
+        def min_value(state, depth, alpha, beta):
             if state.terminal_test(): return state.utility(self.player_id)
             if depth <= 0: return self.score(state)
             value = float("inf")
             for action in state.actions():
-                value = min(value, max_value(state.result(action), depth - 1))
+                value = min(value, max_value(state.result(action), depth - 1, alpha, beta))
+                if value <= alpha: return value
+                beta = min(beta, value)
             return value
 
-        def max_value(state, depth):
+        def max_value(state, depth, alpha, beta):
             if state.terminal_test(): return state.utility(self.player_id)
             if depth <= 0: return self.score(state)
             value = float("-inf")
             for action in state.actions():
-                value = max(value, min_value(state.result(action), depth - 1))
+                value = max(value, min_value(state.result(action), depth - 1, alpha, beta))
+                if value >= beta: return value
+                alpha = max(alpha, value)
             return value
+        
+        alpha = float("-inf") 
+        beta = float("inf")
+        best_score = float("-inf")
+        best_move = None
+        for a in state.actions():
+            value = min_value(state.result(a), depth-1, alpha, beta)
+            alpha = max(alpha, value)
+            if value > best_score:
+                best_score = value
+                best_move = a
+        return best_move
 
-        return max(state.actions(), key=lambda x: min_value(state.result(x), depth - 1))
+        #return max(state.actions(), key=lambda x: min_value(state.result(x), depth - 1))
+
 
     def score(self, state):
         own_loc = state.locs[self.player_id]
