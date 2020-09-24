@@ -79,7 +79,7 @@ class CustomPlayer(DataPlayer):
         def uct_search(self, s):
             v0 = TreeNode(s)
             start_time = time.time()
-            end_time = start_time + 120000 # ms
+            end_time = start_time + 100 # ms
             while time.time() < start_time:
                 vi = tree_policy(v0)
                 delta = default_policy(s)
@@ -109,7 +109,6 @@ class CustomPlayer(DataPlayer):
                 result_dict.append({next_v: next_v.Q/next_v.N})
             return max(result_dict, key=result_dict.get)
                 
-        
         def default_policy(s):
             while not s.terminal_test():
                 s = s.result(random.choice(s.actions()))
