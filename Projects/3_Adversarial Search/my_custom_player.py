@@ -12,7 +12,6 @@ class TreeNode(object):
         self.children = {}
         self.fully_expanded = False
         self.untried_actions = state.actions()
-        self.action_taken = None
         self.N = 1
         self.Q = 1
         
@@ -88,7 +87,7 @@ class CustomPlayer(DataPlayer):
             
         def tree_policy(v):
             while not v.state.terminal_test():
-                if not v.fully_expanded: 
+                if len(v.untried_actions) > 0: 
                     return expand(v)
                 else:
                     v = best_child(v, 0)
