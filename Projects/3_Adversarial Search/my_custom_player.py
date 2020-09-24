@@ -10,7 +10,6 @@ class TreeNode(object):
         self.state = state
         self.parent = None
         self.children = {}
-        self.fully_expanded = False
         self.untried_actions = state.actions()
         self.N = 1
         self.Q = 1
@@ -102,7 +101,6 @@ class CustomPlayer(DataPlayer):
             return next_v
         
         def best_child(self, v, c):
-            print("Best Child")
             result_dict = {}
             for next_v in v.children.keys():
                 result_dict.append({next_v: next_v.Q/next_v.N})
