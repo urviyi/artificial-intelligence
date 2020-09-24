@@ -77,24 +77,21 @@ class CustomPlayer(DataPlayer):
     def monte_carlo_tree_search(self, s):
         
         def uct_search(self, s):
-            c = 1
             v0 = TreeNode(s)
             start_time = time.time()
-            end_time = start_time + 120 # ms
+            end_time = start_time + 120000 # ms
             while time.time() < start_time:
                 vi = tree_policy(v0)
                 delta = default_policy(s)
                 backup(vi, delta)
-            return best_child(v0, c)
+            return best_child(v0, 0)
             
-        
         def tree_policy(v):
-            Cp = 1
             while not v.state.terminal_test():
                 if not v.fully_expanded: 
                     return expand(v)
                 else:
-                    v = best_child(v, Cp)
+                    v = best_child(v, 0)
             return v
         
         def expand(v):
@@ -104,10 +101,9 @@ class CustomPlayer(DataPlayer):
             next_v.parent = v
             v.children.append({a: next_v})
             return next_v
-                    
-            pass
         
         def best_child(self, v, c):
+            print("Best Child")
             result_dict = {}
             for next_v in v.children.keys():
                 result_dict.append({next_v: next_v.Q/next_v.N})
