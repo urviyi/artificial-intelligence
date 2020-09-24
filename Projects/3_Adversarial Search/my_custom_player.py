@@ -80,7 +80,7 @@ class CustomPlayer(DataPlayer):
             c = 1
             v0 = TreeNode(state)
             start_time = time.time()
-            end_time = start_time + 100000 # ms
+            end_time = start_time + 120 # ms
             while time.time() < start_time:
                 s = state
                 vi = tree_policy(v0)
