@@ -74,15 +74,14 @@ class CustomPlayer(DataPlayer):
             self.queue.put(self.monte_carlo_tree_search(state))
             
             
-    def monte_carlo_tree_search(self, state):
+    def monte_carlo_tree_search(self, s):
         
-        def uct_search(self, state):
+        def uct_search(self, s):
             c = 1
-            v0 = TreeNode(state)
+            v0 = TreeNode(s)
             start_time = time.time()
             end_time = start_time + 120 # ms
             while time.time() < start_time:
-                s = state
                 vi = tree_policy(v0)
                 delta = default_policy(s)
                 backup(vi, delta)
