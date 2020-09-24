@@ -9,7 +9,7 @@ class TreeNode(object):
     def __init__(self, state):
         self.state = state
         self.parent = None
-        self.children = [ ]
+        self.children = {}
         self.fully_expanded = False
         self.untried_actions = state.actions()
         self.action_taken = None
@@ -80,7 +80,7 @@ class CustomPlayer(DataPlayer):
             c = 1
             v0 = TreeNode(state)
             start_time = time.time()
-            end_time = start_time + 120 # ms
+            end_time = start_time + 100000 # ms
             while time.time() < start_time:
                 s = state
                 vi = tree_policy(v0)
@@ -103,14 +103,14 @@ class CustomPlayer(DataPlayer):
             next_state = v.state.result(a)
             next_v = TreeNode(next_state)
             next_v.parent = v
-            v.children.append(next_v)
+            v.children.append({a: next_v})
             return next_v
                     
             pass
         
         def best_child(self, v, c):
             result_dict = {}
-            for next_v in v.children:
+            for next_v in v.children.keys():
                 result_dict.append({next_v: next_v.Q/next_v.N})
             return max(result_dict, key=result_dict.get)
                 
