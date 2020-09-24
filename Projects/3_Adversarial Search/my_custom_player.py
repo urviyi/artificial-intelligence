@@ -1,6 +1,23 @@
 
 from sample_players import DataPlayer
 import random
+import time
+
+
+class TreeNode(object):
+    
+    def __init__(self, state):
+        self.state = state
+        self.parent = None
+        self.children = [ ]
+        self.fully_expanded = False
+        self.untried_actions = state.actions()
+        self.action_taken = None
+        self.N = 1
+        self.Q = 1
+        
+    pass
+
 
 
 class CustomPlayer(DataPlayer):
@@ -20,6 +37,8 @@ class CustomPlayer(DataPlayer):
       any pickleable object to the self.context attribute.
     **********************************************************************
     """
+
+    
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
         available in the current state calls self.queue.put(ACTION) at least
@@ -51,10 +70,66 @@ class CustomPlayer(DataPlayer):
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
-            self.queue.put(self.minimax(state, depth=3))
+            #self.queue.put(self.minimax(state, depth=3))
+            self.queue.put(self.monte_carlo_tree_search(state))
+            
+            
+    def monte_carlo_tree_search(self, state):
+        
+        def uct_search(self, state):
+            c = 1
+            v0 = TreeNode(state)
+            start_time = time.time()
+            end_time = start_time + 120 # ms
+            while time.time() < start_time:
+                s = state
+                vi = tree_policy(v0)
+                delta = default_policy(s)
+                backup(vi, delta)
+            return best_child(v0, c)
+            
+        
+        def tree_policy(v):
+            Cp = 1
+            while not v.state.terminal_test():
+                if not v.fully_expanded: 
+                    return expand(v)
+                else:
+                    v = best_child(v, Cp)
+            return v
+        
+        def expand(v):
+            a = v.untried_actions.pop()
+            next_state = v.state.result(a)
+            next_v = TreeNode(next_state)
+            next_v.parent = v
+            v.children.append(next_v)
+            return next_v
+                    
+            pass
+        
+        def best_child(self, v, c):
+            result_dict = {}
+            for next_v in v.children:
+                result_dict.append({next_v: next_v.Q/next_v.N})
+            return max(result_dict, key=result_dict.get)
+                
+        
+        def default_policy(s):
+            while not s.terminal_test():
+                s = s.result(random.choice(s.actions()))
+            return s.utility(self.player_id)
+        
+        def backup(v, delta):
+            while v is not None:
+                v.N = v.N+1
+                v.Q = v.Q+delta
+                delta = -delta 
+                v = v.parent 
         
         
-    def minimax(self, state, depth):        
+    def minimax(self, state, depth):
+        """ Implement minimax with alpha-beta pruning """
 
         def min_value(state, depth, alpha, beta):
             if state.terminal_test(): return state.utility(self.player_id)
