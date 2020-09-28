@@ -69,17 +69,78 @@ class CustomPlayer(DataPlayer):
             self.queue.put(random.choice(state.actions()))
         else:
             #self.queue.put(self.minimax(state, depth=3))
-            self.queue.put(self.monte_carlo_tree_search(state))
+            #self.queue.put(self.monte_carlo_tree_search(state))
+            self.queue.put(self.principal_variation_search(state, depth=3))
+            
+                        
+            
+    def principal_variation_search(self, state, depth):
+        """ Implement principal variation search """
+        
+        def pvs_min_max(self,state,depth,alpha,beta,color):
+            if depth <=0 or state.terminal_test():
+                return color*self.score(state)
+            explored = []
+            
+            for a in state.actions():
+                if a not in explored:
+                    explored.append(a)
+                    score = pvs_min_max(self, state.result(a),depth-1,alpha,beta,-color)
+                    #score = -score
+                else:
+                    score = pvs_min_max(self, state.result(a),depth-1,alpha,alpha+1,-color)
+                   # score = -score
+                    if alpha<score and beta>score:
+                        score = self.pvs_min_max(self, state.result(a),depth-1,alpha,beta,-color)
+                        #score = -score
+                if alpha<score:
+                    alpha = score
+                if alpha>=beta:
+                    break
+            return alpha
+        
+        alpha = float("-inf") 
+        beta = float("inf")
+        actions = state.actions()
+        
+        if actions:
+            best_move = actions[0]
+        else:
+            best_move = None
+            
+        color = True
+        
+        v = -float("inf")
+        
+        for i, action in enumerate(actions):
+            new_state = state.result(action)
+            
+            if i == 0:
+                v = max(v, pvs_min_max(self, new_state, depth-1, alpha, beta, color))
+            else:
+                v = max(v, pvs_min_max(self, new_state, depth-1, alpha, alpha+1, color))
+                if v>alpha:
+                    v = max(v, pvs_min_max(self, new_state, depth-1, alpha, beta, color))
+            if v > alpha:
+                alpha = v
+                best_move = action
+        return best_move
+                    
+                    
             
             
+        
+
+        
     def monte_carlo_tree_search(self, s):
             
         def tree_policy(v):
-            while not v.state.terminal_test():
-                if len(v.untried_actions) > 0: 
-                    return expand(v)
-                else:
-                    v = best_child(v, 0)
+            if v.state.terminal_test: return v
+            
+            if len(v.untried_actions) >= 0: 
+                return expand(v)
+            else:
+                v = best_child(v, 0)
             return v
         
         def expand(v):
