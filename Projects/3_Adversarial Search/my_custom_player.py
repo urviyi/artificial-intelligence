@@ -1,5 +1,9 @@
 
 from sample_players import DataPlayer
+from isolation import Isolation, Agent, play
+from random import choice as rndchoice
+from copy import deepcopy
+from math import log, sqrt
 import random
 import time
 
@@ -11,10 +15,107 @@ class TreeNode(object):
         self.parent = None
         self.children = {}
         self.untried_actions = state.actions()
-        self.N = 1
+        self.N = 0
+        self.uct = float('inf')
         self.Q = 1
         
     pass
+
+
+class GameTree:
+    def __init__(self, s, par_node=None, pre_action=None):
+        self.parent = par_node
+        self.pre_action = pre_action
+        self.child = []
+        self.untried_actions = s.actions()
+        self.r = 0
+        self.n = 0
+        self.state = s
+        self.player = s.player()
+        self.uct = float('inf')
+        self.result = s.utility(0)
+
+    def __repr__(self):
+        ratio = self.r / (self.n + 1)
+        l = [str(e) for e in (self.pre_action, ''.join(self.state), self.r, self.n, str(ratio)[:5], str(self.uct)[:5])]
+        return ' '.join(l)
+
+    def update(self, v):
+        self.n += 1
+        if self.state.utility(0) < 0:
+            self.r += 0
+        elif self.state.utility(0) > 0:
+            self.r += 1
+
+
+class MCTS:
+    def __init__(self, s):
+        self.root = GameTree(s)
+        self.game = Isolation() ## Initialize the game
+        self.expand_node(self.root) ## Start the initial node expansion
+
+    def run_mcts(self, board):
+        self.__init__(board)
+        start_time = time.time()
+        iii = 0
+        while time.time() - start_time < 0.010: # run for 15 milliseconds
+            self.mcts_loop()
+            iii += 1
+
+    def ai_move(self):
+        best_node, best_visits = None, 0
+        for n in self.root.child:
+            if n.n > best_visits: best_visits, best_node = n.n, n
+        return best_node.pre_action
+
+    def mcts_loop(self):
+        node = self.node_selection(self.root)
+        self.expand_node(node)
+        if len(node.child) > 0:
+            selected_node = rndchoice(node.child)
+        else:
+            selected_node = node
+        v = self.simulation(deepcopy(selected_node.state))
+        self.backpropagation(selected_node, v)
+
+    def node_selection(self, node):
+        if node.child:
+            imax, vmax = 0, 0
+            for i, n in enumerate(node.child):
+                n.uct = MCTS.uct(n)
+                v = n.uct
+                if v > vmax:
+                    imax, vmax = i, v
+            selected = node.child[imax]
+            return self.node_selection(selected)
+        else:
+            selected = node
+            return selected
+
+    def expand_node(self, node):
+        if node.state.terminal_test() == False:
+            for a in node.state.actions():
+                state_after_action = node.state.result(a)
+                node.child.append(GameTree(state_after_action, node, a))
+
+    def simulation(self, s):
+        if not s.terminal_test():
+            actions = s.actions()
+            a = rndchoice(actions)
+            new_s = s.result(a)
+            return new_s
+        else:
+            return s.utility(0)
+
+    def backpropagation(self, node, v):
+        node.update(v)
+        if node.parent != None:
+            self.backpropagation(node.parent, v)
+
+    @staticmethod
+    def uct(node):
+        v = (node.r / (node.n + 1e-12)) + sqrt(2 * log(node.parent.n + 1) / (node.n + 1e-12))
+        return v    
 
 
 
@@ -35,7 +136,7 @@ class CustomPlayer(DataPlayer):
       any pickleable object to the self.context attribute.
     **********************************************************************
     """
-
+        
     
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
@@ -54,6 +155,7 @@ class CustomPlayer(DataPlayer):
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
+        
         # TODO: Replace the example implementation below with your own search
         #       method by combining techniques from lecture
         #
@@ -65,18 +167,25 @@ class CustomPlayer(DataPlayer):
         
         # randomly select a move as player 1 or 2 on an empty board, otherwise
         # return the optimal minimax move at a fixed search depth of 3 plies
+        
+        #self.ai = MCTS(state)
+        #self.ai.run_mcts(state)
+        
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
             #self.queue.put(self.minimax(state, depth=3))
-            #self.queue.put(self.monte_carlo_tree_search(state))
-            self.queue.put(self.principal_variation_search(state, depth=3))
+            self.queue.put(self.monte_carlo_tree_search(state))
+            #self.queue.put(self.principal_variation_search(state, depth=3))
+            #self.queue.put(self.ai.ai_move())
+           
             
-                        
+        
             
     def principal_variation_search(self, state, depth):
         """ Implement principal variation search """
         
+        """
         def pvs_min_max(self,state,depth,alpha,beta,color):
             if depth <=0 or state.terminal_test():
                 return color*self.score(state)
@@ -125,37 +234,42 @@ class CustomPlayer(DataPlayer):
                 alpha = v
                 best_move = action
         return best_move
-                    
-                    
-            
-            
-        
+        """
 
+                    
         
     def monte_carlo_tree_search(self, s):
             
         def tree_policy(v):
-            if v.state.terminal_test: return v
-            
-            if len(v.untried_actions) >= 0: 
-                return expand(v)
-            else:
-                v = best_child(v, 0)
+            if v.state.terminal_test(): 
+                return v
+            while not v.state.terminal_test():
+                print(v.state.actions())
+                if len(v.untried_actions) > 0: 
+                    return expand(v) 
+                else:
+                    v = best_child(v, 0)
             return v
         
         def expand(v):
             a = v.untried_actions.pop()
             next_state = v.state.result(a)
-            next_v = TreeNode(next_state)
-            next_v.parent = v
-            v.children[a] = next_v
+            next_v = v.child.append(GameTree(next_state, v, a))
             return next_v
         
+        def uct(v):
+            uct = (v.r / (v.n + 1e-12)) + sqrt(2 * log(v.parent.n + 1) / (v.n + 1e-12))
+            return uct
+            
         def best_child(v, c):
-            result_dict = {}
-            for a, next_v in v.children.items():
-                result_dict[next_v] = next_v.Q/next_v.N
-            return max(result_dict, key=result_dict.get)
+            imax, vmax = 0,0
+            for i, next_v in enumerate(v.child):
+                next_v.uct = uct(v)
+                value = next_v.uct 
+                if value > vmax:
+                    imax, vmax = i, value 
+            best_child = v.child[i]
+            return best_child 
                 
         def default_policy(s):
             while not s.terminal_test():
@@ -163,20 +277,23 @@ class CustomPlayer(DataPlayer):
             return s.utility(self.player_id)
         
         def backup(v, delta):
-            while v is not None:
-                v.N = v.N+1
-                v.Q = v.Q+delta
+            while v.parent is not None:
+                v.n = v.n + 1
+                v.r = v.r + delta
                 delta = -delta 
                 v = v.parent
-                
-        v0 = TreeNode(s)
-        start_time = time.time()
-        end_time = start_time + 100 # ms
-        while time.time() < end_time:
-            vi = tree_policy(v0)
-            delta = default_policy(s)
-            backup(vi, delta)
-        return best_child(v0, 0)
+         
+        v0 = GameTree(s)        
+        start_time = time.time()        
+        
+        while time.time() - start_time < 0.010:
+            vl = tree_policy(v0)
+            delta = default_policy(vl.state)
+            backup(vl, delta)
+            best_child = best_child(v0,0) #return a node
+        return best_child.pre_action
+    
+    
         
         
     def minimax(self, state, depth):
@@ -214,13 +331,9 @@ class CustomPlayer(DataPlayer):
                 best_move = a
         return best_move
 
-        #return max(state.actions(), key=lambda x: min_value(state.result(x), depth - 1))
-
-
     def score(self, state):
         own_loc = state.locs[self.player_id]
         opp_loc = state.locs[1 - self.player_id]
         own_liberties = state.liberties(own_loc)
         opp_liberties = state.liberties(opp_loc)
-        return len(own_liberties) - len(opp_liberties)    
-    
+        return len(own_liberties) - len(opp_liberties)
