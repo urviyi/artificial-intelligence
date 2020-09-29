@@ -8,20 +8,6 @@ import random
 import time
 
 
-class TreeNode(object):
-    
-    def __init__(self, state):
-        self.state = state
-        self.parent = None
-        self.children = {}
-        self.untried_actions = state.actions()
-        self.N = 0
-        self.uct = float('inf')
-        self.Q = 1
-        
-    pass
-
-
 class GameTree:
     def __init__(self, s, par_node=None, pre_action=None):
         self.parent = par_node
@@ -243,10 +229,11 @@ class CustomPlayer(DataPlayer):
         def tree_policy(v):
             if v.state.terminal_test(): 
                 return v
+            if len(v.child) == 0:
+                return v
             while not v.state.terminal_test():
-                print(v.state.actions())
                 if len(v.untried_actions) > 0: 
-                    return expand(v) 
+                    expand(v) 
                 else:
                     v = best_child(v, 0)
             return v
@@ -262,13 +249,15 @@ class CustomPlayer(DataPlayer):
             return uct
             
         def best_child(v, c):
+            if v.state.terminal_test(): return v
             imax, vmax = 0,0
+            best_child = v
             for i, next_v in enumerate(v.child):
                 next_v.uct = uct(v)
-                value = next_v.uct 
+                value = next_v.uct
                 if value > vmax:
-                    imax, vmax = i, value 
-            best_child = v.child[i]
+                    imax, vmax = i,value 
+                    best_child = v.child[i]
             return best_child 
                 
         def default_policy(s):
@@ -290,8 +279,7 @@ class CustomPlayer(DataPlayer):
             vl = tree_policy(v0)
             delta = default_policy(vl.state)
             backup(vl, delta)
-            best_child = best_child(v0,0) #return a node
-        return best_child.pre_action
+        return best_child(v0,0).pre_action
     
     
         

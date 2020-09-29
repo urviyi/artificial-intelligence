@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 NUM_PROCS = 1
 NUM_ROUNDS = 5  # number times to replicate the match; increase for higher confidence estimate
-TIME_LIMIT = 150  # number of milliseconds before timeout
+TIME_LIMIT = 150 # number of milliseconds before timeout
 
 TEST_AGENTS = {
     "RANDOM": Agent(RandomPlayer, "Random Agent"),
@@ -105,6 +105,7 @@ def play_matches(custom_agent, test_agent, cli_args):
 
 def main(args):
     test_agent = TEST_AGENTS[args.opponent.upper()]
+    #test_agent = Agent(RandomPlayer, "Random Agent")
     custom_agent = Agent(CustomPlayer, "Custom Agent")
     wins, num_games = play_matches(custom_agent, test_agent, args)
 
