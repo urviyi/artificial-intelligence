@@ -177,7 +177,7 @@ class CustomPlayer(DataPlayer):
                 return 0
             
         def tree_policy(v, c):
-            if v.state.terminal_test(): return v            
+            if v.state.terminal_test(): return v           
             if not (v.state.terminal_test()):
                 if len(v.state.actions()) != len(v.child): 
                     expand(v) 
@@ -197,13 +197,15 @@ class CustomPlayer(DataPlayer):
             
         def best_child(v, c):
             if (v.state.terminal_test()): return v
-            best_child = v.child[0]
-            imax, vmax = 0,0
+            
+            best_child = v.child[-1]
+            uctmax = uct(best_child, c)
+            imax = len(v.child) - 1
+            
             for i, child in enumerate(v.child):
-                child.uct = uct(child, c)
-                value = child.uct
-                if value > vmax:
-                    imax, vmax = i,value
+                i_uct = uct(child, c)
+                if i_uct > uctmax:
+                    imax, uctmax = i,i_uct
                     best_child = v.child[i]
                 return best_child
                 
@@ -225,7 +227,7 @@ class CustomPlayer(DataPlayer):
         start_time = time.time()        
         c = 0.9
         
-        while time.time() - start_time < 0.015:
+        while time.time() - start_time < 0.030:
             vl = tree_policy(v0, c)
             delta = default_policy(vl.state)
             backup(vl, delta)
