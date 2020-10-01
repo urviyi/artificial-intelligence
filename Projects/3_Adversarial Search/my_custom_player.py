@@ -168,34 +168,32 @@ class CustomPlayer(DataPlayer):
         
     def monte_carlo_tree_search(self, s):
             
-        def tree_policy(v):
+        def tree_policy(v, c):
             if v.state.terminal_test(): 
                 return v
-            if len(v.child) == 0:
-                return v
             while not v.state.terminal_test():
-                if len(v.untried_actions) > 0: 
+                if len(v.state.actions()) > len(v.child): 
                     expand(v) 
                 else:
-                    v = best_child(v, 0)
+                    v = best_child(v, c)
             return v
         
         def expand(v):
-            a = v.untried_actions.pop()
+            a = random.choice([a for a in v.state.actions() if a not in [child.state.actions() for child in v.child]])
             next_state = v.state.result(a)
             next_v = v.child.append(GameTree(next_state, v, a))
             return next_v
         
-        def uct(v):
-            uct = (v.r / (v.n + 1e-12)) + sqrt(2 * log(v.parent.n + 1) / (v.n + 1e-12))
+        def uct(v, c):
+            uct = (v.r / (v.n + 1e-12)) + c*sqrt(2 * log(v.parent.n + 1) / (v.n + 1e-12))
             return uct
             
         def best_child(v, c):
             if v.state.terminal_test(): return v
+            best_child = random.choice(v.child)
             imax, vmax = 0,0
-            best_child = v
             for i, next_v in enumerate(v.child):
-                next_v.uct = uct(v)
+                next_v.uct = uct(next_v, c)
                 value = next_v.uct
                 if value > vmax:
                     imax, vmax = i,value 
@@ -213,15 +211,19 @@ class CustomPlayer(DataPlayer):
                 v.r = v.r + delta
                 delta = -delta 
                 v = v.parent
+                pass
+            pass
+        
          
         v0 = GameTree(s)        
         start_time = time.time()        
+        c = 0
         
         while time.time() - start_time < 0.015:
-            vl = tree_policy(v0)
+            vl = tree_policy(v0, c)
             delta = default_policy(vl.state)
             backup(vl, delta)
-        return best_child(v0,0).pre_action
+        return best_child(v0,c).pre_action
     
     
         
