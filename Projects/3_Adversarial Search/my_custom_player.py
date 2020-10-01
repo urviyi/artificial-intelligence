@@ -221,16 +221,28 @@ class CustomPlayer(DataPlayer):
                 v.r += delta
                 delta *= -1 
                 v = v.parent
-                
-         
+            
+        def mcts_loop(v0, c):
+            vl = tree_policy(v0, c)
+            delta = default_policy(vl.state)
+            backup(vl, delta)
+            return vl
+            
+            
         v0 = GameTree(s)        
         start_time = time.time()        
         c = 0.9
         
-        while time.time() - start_time < 0.030:
+        while time.time() - start_time < 0.050:
+            
             vl = tree_policy(v0, c)
-            delta = default_policy(vl.state)
-            backup(vl, delta)
+            vl2 = tree_policy(vl, c)
+            vl3 = tree_policy(vl2, c)
+            vl4 = tree_policy(vl3, c)
+            
+            delta = default_policy(vl3.state)
+            backup(vl3, delta)
+            
         return best_child(v0,c).pre_action
     
     
