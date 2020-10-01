@@ -167,6 +167,13 @@ class CustomPlayer(DataPlayer):
                     
         
     def monte_carlo_tree_search(self, s):
+        
+        def score(state):
+            own_loc = state.locs[self.player_id]
+            opp_loc = state.locs[1 - self.player_id]
+            own_liberties = state.liberties(own_loc)
+            opp_liberties = state.liberties(opp_loc)
+            return len(own_liberties) - len(opp_liberties)
             
         def tree_policy(v, c):
             if v.state.terminal_test(): 
@@ -203,21 +210,22 @@ class CustomPlayer(DataPlayer):
         def default_policy(s):
             while not s.terminal_test():
                 s = s.result(random.choice(s.actions()))
-            return s.utility(self.player_id)
+            return score(s)
         
         def backup(v, delta):
             while v.parent is not None:
                 v.n = v.n + 1
                 v.r = v.r + delta
-                delta = -delta 
+                delta *= -1 
                 v = v.parent
                 pass
             pass
+    
         
          
         v0 = GameTree(s)        
         start_time = time.time()        
-        c = 0
+        c = 0.5
         
         while time.time() - start_time < 0.015:
             vl = tree_policy(v0, c)
