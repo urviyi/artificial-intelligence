@@ -203,7 +203,8 @@ class CustomPlayer(DataPlayer):
                 next_v.uct = uct(next_v, c)
                 value = next_v.uct
                 if value > vmax:
-                    imax, vmax = i,value 
+                    imax, vmax = i,value
+                    print(vmax)
                     best_child = v.child[i]
             return best_child 
                 
@@ -219,13 +220,11 @@ class CustomPlayer(DataPlayer):
                 delta *= -1 
                 v = v.parent
                 pass
-            pass
-    
-        
+            pass    
          
         v0 = GameTree(s)        
         start_time = time.time()        
-        c = 0.5
+        c = 0.8
         
         while time.time() - start_time < 0.015:
             vl = tree_policy(v0, c)
