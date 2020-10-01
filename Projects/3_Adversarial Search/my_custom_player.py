@@ -161,27 +161,24 @@ class CustomPlayer(DataPlayer):
             self.queue.put(random.choice(state.actions()))
         else:
             #self.queue.put(self.minimax(state, depth=3))
-            #print(self.player_id)
             self.queue.put(self.monte_carlo_tree_search(state))
             #self.queue.put(self.ai.ai_move())
-           
-                    
+                        
         
     def monte_carlo_tree_search(self, s):
         
         def score(state):
             if state.terminal_test():
-                return state.utility(self.player_id)
+                if state.utility(self.player_id) > 0:
+                    return 1
+                else:
+                    return -1
             else:
-                own_loc = state.locs[self.player_id]
-                opp_loc = state.locs[1 - self.player_id]
-                own_liberties = state.liberties(own_loc)
-                opp_liberties = state.liberties(opp_loc)
-                return len(own_liberties) - len(opp_liberties)
+                return 0
             
         def tree_policy(v, c):
             if v.state.terminal_test(): return v            
-            while not (v.state.terminal_test()):
+            if not (v.state.terminal_test()):
                 if len(v.state.actions()) > len(v.child): 
                     expand(v) 
                 else:
@@ -200,34 +197,33 @@ class CustomPlayer(DataPlayer):
             
         def best_child(v, c):
             if (v.state.terminal_test()): return v
-            best_child = random.choice(v.child)
+            best_child = v.child[0]
             imax, vmax = 0,0
-            for i, next_v in enumerate(v.child):
-                next_v.uct = uct(next_v, c)
-                value = next_v.uct
+            for i, child in enumerate(v.child):
+                child.uct = uct(child, c)
+                value = child.uct
                 if value > vmax:
                     imax, vmax = i,value
                     best_child = v.child[i]
-            return best_child 
+                return best_child
                 
         def default_policy(s):
-            while not (s.terminal_test()):
+            if not (s.terminal_test()):
                 a = random.choice(s.actions())
                 s = s.result(a)
             return score(s)
             
         def backup(v, delta):
             while v.parent is not None:
-                v.n = v.n + 1
-                v.r = v.r + delta
+                v.n += 1
+                v.r += delta
                 delta *= -1 
                 v = v.parent
-                pass
-            pass    
+                
          
         v0 = GameTree(s)        
         start_time = time.time()        
-        c = 0.85
+        c = 0.9
         
         while time.time() - start_time < 0.015:
             vl = tree_policy(v0, c)
