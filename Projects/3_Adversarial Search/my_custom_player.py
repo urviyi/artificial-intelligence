@@ -179,7 +179,7 @@ class CustomPlayer(DataPlayer):
         def tree_policy(v, c):
             if v.state.terminal_test(): return v            
             if not (v.state.terminal_test()):
-                if len(v.state.actions()) > len(v.child): 
+                if len(v.state.actions()) != len(v.child): 
                     expand(v) 
                 else:
                     v = best_child(v, c)
