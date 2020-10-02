@@ -154,15 +154,12 @@ class CustomPlayer(DataPlayer):
         # randomly select a move as player 1 or 2 on an empty board, otherwise
         # return the optimal minimax move at a fixed search depth of 3 plies
         
-        #self.ai = MCTS(state)
-        #self.ai.run_mcts(state)
         
         if state.ply_count < 2:
             self.queue.put(random.choice(state.actions()))
         else:
             #self.queue.put(self.minimax(state, depth=3))
             self.queue.put(self.monte_carlo_tree_search(state))
-            #self.queue.put(self.ai.ai_move())
                         
         
     def monte_carlo_tree_search(self, s):
@@ -178,11 +175,9 @@ class CustomPlayer(DataPlayer):
             
         def tree_policy(v, c):
             if v.state.terminal_test(): return v           
-            if not (v.state.terminal_test()):
-                if len(v.state.actions()) != len(v.child): 
-                    expand(v) 
-                else:
-                    v = best_child(v, c)
+            if len(v.state.actions()) != len(v.child): 
+                expand(v) 
+            v = best_child(v, c)
             return v
         
         def expand(v):
@@ -221,14 +216,7 @@ class CustomPlayer(DataPlayer):
                 v.r += delta
                 delta *= -1 
                 v = v.parent
-            
-        def mcts_loop(v0, c):
-            vl = tree_policy(v0, c)
-            delta = default_policy(vl.state)
-            backup(vl, delta)
-            return vl
-            
-            
+                              
         v0 = GameTree(s)        
         start_time = time.time()        
         c = 0.90
